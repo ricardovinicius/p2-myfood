@@ -1,4 +1,4 @@
-package br.ufal.ic.p2.myfood.models;
+package br.ufal.ic.p2.myfood.types;
 
 public class Unique<T> {
     final T value;

@@ -1,6 +1,7 @@
 package br.ufal.ic.p2.myfood.models;
 
-import br.ufal.ic.p2.myfood.repositories.Repository;
+import br.ufal.ic.p2.myfood.repositories.UserRepository;
+import br.ufal.ic.p2.myfood.types.Persistent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Restaurant.class, name = "restaurant")
 })
-public class Company extends Persistent {
+public abstract class Company extends Persistent {
     private static int id_counter = 1;
     private String name;
     private String address;
@@ -44,12 +45,8 @@ public class Company extends Persistent {
 
     @JsonIgnore()
     public User getOwner() {
-        Repository<User> userRepository = Repository.getInstance(User.class);
-        return userRepository.list()
-                .stream()
-                .filter(u -> u.getId() == ownerId)
-                .findFirst()
-                .orElse(null);
+        UserRepository userRepository = UserRepository.getInstance();
+        return userRepository.getById(ownerId).orElse(null);
     }
 
     public int getOwnerId() {

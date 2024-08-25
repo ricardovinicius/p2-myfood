@@ -1,4 +1,4 @@
-package br.ufal.ic.p2.myfood.models;
+package br.ufal.ic.p2.myfood.types;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class Persistent {
-    int id;
+    protected int id;
 
     public int getId() {
         return id;

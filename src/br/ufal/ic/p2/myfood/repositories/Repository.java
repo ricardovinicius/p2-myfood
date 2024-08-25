@@ -1,29 +1,23 @@
 package br.ufal.ic.p2.myfood.repositories;
 
 import br.ufal.ic.p2.myfood.exceptions.UniqueFieldException;
-import br.ufal.ic.p2.myfood.models.Persistent;
+import br.ufal.ic.p2.myfood.types.Persistent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.management.InstanceNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Repository<T extends Persistent> {
     private final List<T> listItem = new ArrayList<>();
     private final String DATA_FOLDER_PATH = "./data";
     Class<T> clazz;
 
-    // Singleton map to hold instances for different types
-    private static final Map<Class<? extends Persistent>, Repository<?>> instances = new HashMap<>();
-
-    // Private constructor
-    private Repository(Class<T> clazz) {
+    public Repository(Class<T> clazz) {
         this.clazz = clazz;
 
         try {
@@ -34,18 +28,6 @@ public class Repository<T extends Persistent> {
     }
 
     public Repository() {}
-
-    // Static method to get the singleton instance
-    public static <T extends Persistent> Repository<T> getInstance(Class<T> clazz) {
-        if (!instances.containsKey(clazz)) {
-            synchronized (instances) {
-                if (!instances.containsKey(clazz)) {
-                    instances.put(clazz, new Repository<>(clazz));
-                }
-            }
-        }
-        return (Repository<T>) instances.get(clazz);
-    }
 
     public void add(T item) throws UniqueFieldException {
          Field[] uniqueFields = item.getUniqueFields();
@@ -63,7 +45,7 @@ public class Repository<T extends Persistent> {
                  try {
                      System.out.println(getFieldMethod.invoke(i) + " " + getFieldMethod.invoke(item));
                      if (getFieldMethod.invoke(i).equals(getFieldMethod.invoke(item))) {
-                         throw new UniqueFieldException("Unique fields must be unique. Duplicate found for field: " + fieldName);
+                         throw new UniqueFieldException(field);
                      }
                  } catch (IllegalAccessException | InvocationTargetException e) {
                      throw new RuntimeException(e);
@@ -76,16 +58,27 @@ public class Repository<T extends Persistent> {
     public void remove(T item){
         listItem.remove(item);
     };
-    public List<T> list() {
-        return listItem;
+    public void update(T item) throws NoSuchElementException {
+        for (int i = 0; i < listItem.size(); i++) {
+            T obj = listItem.get(i);
+            if (obj.getId() == item.getId()) {
+                listItem.set(i, item);
+                return;
+            }
+        }
+
+        throw new NoSuchElementException("Object with given ID not found");
     }
-    List<T> createOrLoadPersistence() throws IOException {
+    public List<T> list() {
+        return Collections.unmodifiableList(listItem);
+    }
+    void createOrLoadPersistence() throws IOException {
         File dir = new File(DATA_FOLDER_PATH + "/" + clazz.getSimpleName());
 
         if (!dir.exists()) {
             boolean dirWasCreated = new File(DATA_FOLDER_PATH + "/" + clazz.getSimpleName()).mkdir();
 
-            return listItem;
+            return;
         }
 
         ObjectMapper mapper = new ObjectMapper();
@@ -93,7 +86,7 @@ public class Repository<T extends Persistent> {
         File[] files = dir.listFiles(File::isFile);
 
         if (files == null) {
-            return listItem;
+            return;
         }
 
         for (File file: files) {
@@ -101,7 +94,6 @@ public class Repository<T extends Persistent> {
             listItem.add(item);
         }
 
-        return listItem;
     }
 
     public void clean() throws IOException {

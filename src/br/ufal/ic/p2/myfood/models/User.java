@@ -1,5 +1,7 @@
 package br.ufal.ic.p2.myfood.models;
 
+import br.ufal.ic.p2.myfood.types.Persistent;
+import br.ufal.ic.p2.myfood.types.Unique;
 import br.ufal.ic.p2.myfood.utils.Validator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

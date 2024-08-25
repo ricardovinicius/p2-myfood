@@ -78,7 +78,7 @@ expectError "Valor invalido" editarProduto produto=${p3} nome="Refrigerante" val
 expectError "Categoria invalido" editarProduto produto=${p3} nome="Refrigerante" valor=3.00  categoria=  
 expectError "Categoria invalido" editarProduto produto=${p3} nome="Refrigerante" valor=3.00  categoria="" 
 
-expectError "Produto não cadastrado" editarProduto produto=9999 nome="Refrigerante" valor=3.00  categoria="bebida"
+expectError "Produto nao cadastrado" editarProduto produto=9999 nome="Refrigerante" valor=3.00  categoria="bebida"
 
 editarProduto produto=${p3} nome="Refrigerante de laranja" valor=4.40  categoria="bebida"
 
@@ -90,8 +90,8 @@ expect "4.40" getProduto nome="Refrigerante de laranja" empresa=${eid2} atributo
 expect "bebida" getProduto nome="Refrigerante de laranja" empresa=${eid2} atributo="categoria"
 expect "Pastelaria do Roberto" getProduto nome="Refrigerante de laranja" empresa=${eid2} atributo="empresa"
 
-expectError "Produto não encontrado" getProduto nome="Pastel" empresa=${eid2} atributo="valor"
-expectError "Atributo não existe" getProduto nome="Refrigerante de laranja" empresa=${eid2} atributo="desconto"
+expectError "Produto nao encontrado" getProduto nome="Pastel" empresa=${eid2} atributo="valor"
+expectError "Atributo nao existe" getProduto nome="Refrigerante de laranja" empresa=${eid2} atributo="desconto"
 
 ###################
 # testes para listar os produtos da empresa.

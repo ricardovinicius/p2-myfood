@@ -38,6 +38,6 @@ public class Restaurant extends Company {
             return kitchenType;
         }
 
-        throw new IllegalArgumentException("Attribute not found: " + attribute);
+        return null;
     }
 }
