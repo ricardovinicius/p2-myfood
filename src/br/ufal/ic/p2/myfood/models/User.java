@@ -1,8 +1,20 @@
 package br.ufal.ic.p2.myfood.models;
 
-public class User {
+import br.ufal.ic.p2.myfood.utils.Validator;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Customer.class, name = "customer"),
+        @JsonSubTypes.Type(value = Owner.class, name = "owner")
+})
+public class User extends Persistent {
     private static int id_counter = 1;
-    private int id;
     private String name;
     private String email;
     private String password;
@@ -14,17 +26,32 @@ public class User {
         this.password = password;
     }
 
-    public static User create(String name, String email, String password) {
-        return new User(name, email, password);
+    public User() {
+    }
+
+    public static void create(String name, String email, String password) {
+        if (Validator.isNullOrEmpty(name)) {
+            throw new RuntimeException("Nome invalido");
+        }
+
+        // Isso aqui é muita inconsistência da lógica de negócio :/
+        if (email == null) {
+            throw new RuntimeException("Email invalido");
+        }
+
+        if (!Validator.isValidEmail(email)) {
+            throw new RuntimeException("Formato de email invalido");
+        }
+
+        if (Validator.isNullOrEmpty(password)) {
+            throw new RuntimeException("Senha invalido");
+        }
     }
 
     public boolean login(String email, String password) {
         return this.password.equals(password);
     }
 
-    public int getId() {
-        return id;
-    }
 
     public String getName() {
         return name;
@@ -44,13 +71,21 @@ public class User {
 
     public String getAttribute(String attribute) {
         if (attribute.equals("nome")) {
-            return getName();
+            return name;
         }
 
         if (attribute.equals("email")) {
-            return getEmail();
+            return email;
+        }
+
+        if (attribute.equals("senha")) {
+            return password;
         }
 
         return null;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }
