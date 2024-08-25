@@ -26,4 +26,18 @@ public class Restaurant extends Company {
     public void setKitchenType(String kitchenType) {
         this.kitchenType = kitchenType;
     }
+
+    public String getAttribute(String attribute) {
+        String value = super.getAttribute(attribute);
+
+        if (value != null) {
+            return value;
+        }
+
+        if (attribute.equals("tipoCozinha")) {
+            return kitchenType;
+        }
+
+        throw new IllegalArgumentException("Attribute not found: " + attribute);
+    }
 }

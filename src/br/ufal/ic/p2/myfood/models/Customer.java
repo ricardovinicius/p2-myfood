@@ -15,6 +15,7 @@ public class Customer extends User {
         this.address = address;
     }
 
+
     public static Customer create(String name, String email, String password, String address) {
         User.create(name, email, password);
 

@@ -1,5 +1,7 @@
 package br.ufal.ic.p2.myfood.models;
 
+import br.ufal.ic.p2.myfood.repositories.Repository;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -13,25 +15,23 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public class Company extends Persistent {
     private static int id_counter = 1;
-    private Unique<String> name;
+    private String name;
     private String address;
-    private int owner_id;
+    private int ownerId;
 
     public Company() {}
 
-    Company(String name, String address, int owner_id) {
+    Company(String name, String address, int ownerId) {
         this.id = id_counter++;
-        this.name = new Unique(name);
+        this.name = name;
         this.address = address;
-        this.owner_id = owner_id;
+        this.ownerId = ownerId;
     }
 
-    public static void create(String name, String address, int owner_id) {
-        return;
-    }
+    public static void create(String name, String address, int owner_id) {}
 
     public String getName() {
-        return name.getValue();
+        return name;
     }
 
     public String getAddress() {
@@ -42,11 +42,42 @@ public class Company extends Persistent {
         this.address = address;
     }
 
-    public int getOwner_id() {
-        return owner_id;
+    @JsonIgnore()
+    public User getOwner() {
+        Repository<User> userRepository = Repository.getInstance(User.class);
+        return userRepository.list()
+                .stream()
+                .filter(u -> u.getId() == ownerId)
+                .findFirst()
+                .orElse(null);
     }
 
-    public void setOwner_id(int owner_id) {
-        this.owner_id = owner_id;
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + name + ", " + address + "]";
+    }
+
+    public String getAttribute(String attribute) {
+        if (attribute.equals("nome")) {
+            return name;
+        }
+
+        if (attribute.equals("endereco")) {
+            return address;
+        }
+
+        if (attribute.equals("dono")) {
+            return getOwner().getName();
+        }
+
+        return null;
     }
 }

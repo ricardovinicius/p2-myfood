@@ -13,23 +13,23 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = Customer.class, name = "customer"),
         @JsonSubTypes.Type(value = Owner.class, name = "owner")
 })
-public class User extends Persistent {
+public abstract class User extends Persistent {
     private static int id_counter = 1;
     private String name;
-    private String email;
+    private Unique<String> email;
     private String password;
 
     User(String name, String email, String password) {
         this.id = id_counter++;
         this.name = name;
-        this.email = email;
+        this.email = new Unique(email);
         this.password = password;
     }
 
     public User() {
     }
 
-    public static void create(String name, String email, String password) {
+    static void create(String name, String email, String password) {
         if (Validator.isNullOrEmpty(name)) {
             throw new RuntimeException("Nome invalido");
         }
@@ -62,11 +62,7 @@ public class User extends Persistent {
     }
 
     public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+        return email.getValue();
     }
 
     public String getAttribute(String attribute) {
@@ -75,7 +71,7 @@ public class User extends Persistent {
         }
 
         if (attribute.equals("email")) {
-            return email;
+            return email.getValue();
         }
 
         if (attribute.equals("senha")) {

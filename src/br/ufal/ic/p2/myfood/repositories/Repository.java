@@ -10,15 +10,41 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class RepositoryBase<T extends Persistent> {
+public class Repository<T extends Persistent> {
     private final List<T> listItem = new ArrayList<>();
     private final String DATA_FOLDER_PATH = "./data";
     Class<T> clazz;
 
-    public RepositoryBase(Class<T> clazz) {
+    // Singleton map to hold instances for different types
+    private static final Map<Class<? extends Persistent>, Repository<?>> instances = new HashMap<>();
+
+    // Private constructor
+    private Repository(Class<T> clazz) {
         this.clazz = clazz;
+
+        try {
+            createOrLoadPersistence();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Repository() {}
+
+    // Static method to get the singleton instance
+    public static <T extends Persistent> Repository<T> getInstance(Class<T> clazz) {
+        if (!instances.containsKey(clazz)) {
+            synchronized (instances) {
+                if (!instances.containsKey(clazz)) {
+                    instances.put(clazz, new Repository<>(clazz));
+                }
+            }
+        }
+        return (Repository<T>) instances.get(clazz);
     }
 
     public void add(T item) throws UniqueFieldException {
