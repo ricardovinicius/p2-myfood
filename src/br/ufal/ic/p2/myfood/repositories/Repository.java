@@ -4,13 +4,13 @@ import br.ufal.ic.p2.myfood.exceptions.UniqueFieldException;
 import br.ufal.ic.p2.myfood.types.Persistent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.management.InstanceNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+
 
 public class Repository<T extends Persistent> {
     private final List<T> listItem = new ArrayList<>();
@@ -27,8 +27,6 @@ public class Repository<T extends Persistent> {
         }
     }
 
-    public Repository() {}
-
     public void add(T item) throws UniqueFieldException {
          Field[] uniqueFields = item.getUniqueFields();
          for (Field field : uniqueFields) {
@@ -36,7 +34,8 @@ public class Repository<T extends Persistent> {
 
              Method getFieldMethod;
              try {
-                 getFieldMethod = clazz.getMethod("get" + fieldName.substring(0,1).toUpperCase() + fieldName.substring(1));
+                 String capitalizedFieldName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                 getFieldMethod = clazz.getMethod("get" + capitalizedFieldName);
              } catch (NoSuchMethodException e) {
                  throw new RuntimeException(e);
              }

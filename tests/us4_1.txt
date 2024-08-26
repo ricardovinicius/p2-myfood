@@ -103,25 +103,25 @@ adcionarProduto numero=${pe2} produto=${p4}
 
 expectError "Atributo invalido" getPedidos pedido=${pe1} atributo=
 expectError "Atributo invalido" getPedidos pedido=${pe1} atributo=""
-expectError "Atributo não existe" getPedidos pedido=${pe1} atributo="local"
+expectError "Atributo nao existe" getPedidos pedido=${pe1} atributo="local"
 
 expect "Carlos"  getPedidos pedido=${pe1} atributo="cliente"
 expect "Sorveteria do Roberto"  getPedidos pedido=${pe1} atributo="empresa"
 expect "aberto"  getPedidos pedido=${pe1} atributo="estado"
-expect {[Sorvete morango, Sorvete chocolate, Refrigerante]} getPedidos pedido=${pe1} atributo="produtos"
+expect "{[Sorvete morango, Sorvete chocolate, Refrigerante]}" getPedidos pedido=${pe1} atributo="produtos"
 expect "6.20"  getPedidos pedido=${pe1} atributo="valor"
 
 expect "Carlos"  getPedidos pedido=${pe2} atributo="cliente"
 expect "Pastelaria do Roberto"  getPedidos pedido=${pe2} atributo="empresa"
 expect "aberto"  getPedidos pedido=${pe2} atributo="estado"
-expect {[Pastel de queijo, Pastel de queijo, Pastel de queijo]} getPedidos pedido=${pe2} atributo="produtos"
+expect "{[Pastel de queijo, Pastel de queijo, Pastel de queijo]}" getPedidos pedido=${pe2} atributo="produtos"
 expect "15.00"  getPedidos pedido=${pe2} atributo="valor"
 
 ###################
 # testes de todas as combinações importantes para o comando fecharPedido
 ###################
 
-expectError "Pedido não encontrado" fecharPedido numero=9999
+expectError "Pedido nao encontrado" fecharPedido numero=9999
 fecharPedido numero=${pe1}
 
 expect "preparando"  getPedidos pedido=${pe1} atributo="estado"
@@ -143,7 +143,7 @@ expectError "Nao e possivel remover produtos de um pedido fechado" removerProdut
 
 removerProduto pedido=${pe2} produto="Pastel de queijo"
 
-expect {[Pastel de queijo, Pastel de queijo]} getPedidos pedido=${pe2} atributo="produtos"
+expect "{[Pastel de queijo, Pastel de queijo]}" getPedidos pedido=${pe2} atributo="produtos"
 expect "10.00"  getPedidos pedido=${pe2} atributo="valor"
 
 ###################

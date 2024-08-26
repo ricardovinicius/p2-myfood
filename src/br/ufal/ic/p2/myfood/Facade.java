@@ -24,6 +24,7 @@ public class Facade {
         companyRepository.clean();
         productRepository.clean();
         orderRepository.clean();
+        productRepository.clean();
     }
 
     public String getAtributoUsuario(int id, String nome) {
@@ -242,7 +243,7 @@ public class Facade {
         productObj.setCategory(categoria);
 
         try {
-            productRepository.update(productObj);
+            // productRepository.update(productObj);
         } catch (NoSuchElementException e) {
             throw new RuntimeException("Produto nao cadastrado");
         }
@@ -298,6 +299,7 @@ public class Facade {
 
         Optional<Order> existentOrder = companyOrders.stream()
                 .filter(o -> o.getCustomerId() == cliente)
+                .filter(o -> o.getStatus().equals("aberto"))
                 .findFirst();
 
         if (existentOrder.isPresent()) {
@@ -318,6 +320,10 @@ public class Facade {
         }
         Order order = orderOptional.get();
 
+        if (order.getStatus().equals("preparando")) {
+            throw new RuntimeException("Nao e possivel adcionar produtos a um pedido fechado");
+        }
+
         List<Product> productList = productRepository
                 .listByCompanyId(order.getCompanyId());
 
@@ -334,10 +340,84 @@ public class Facade {
         order.getProductList().add(product);
     }
 
+    public String getPedidos(int numero, String atributo) {
+        Optional<Order> orderOptional = orderRepository.getById(numero);
+
+        if (orderOptional.isEmpty()) {
+            throw new RuntimeException("");
+        }
+        Order order = orderOptional.get();
+
+        if (Validator.isNullOrEmpty(atributo)) {
+            throw new RuntimeException("Atributo invalido");
+        }
+
+        String attribute = order.getAttribute(atributo);
+
+        if (attribute == null) {
+            throw new RuntimeException("Atributo nao existe");
+        }
+
+        return attribute;
+    }
+
+    public void fecharPedido(int numero) {
+        Optional<Order> orderOptional = orderRepository.getById(numero);
+
+        if (orderOptional.isEmpty()) {
+            throw new RuntimeException("Pedido nao encontrado");
+        }
+        Order order = orderOptional.get();
+
+        order.setStatus("preparando");
+
+        // orderRepository.update(order);
+    }
+
+    public void removerProduto(int pedido, String produto) {
+        if (Validator.isNullOrEmpty(produto)) {
+            throw new RuntimeException("Produto invalido");
+        }
+
+        Optional<Order> orderOptional = orderRepository.getById(pedido);
+
+        if (orderOptional.isEmpty()) {
+            throw new RuntimeException();
+        }
+        Order order = orderOptional.get();
+
+        if (!order.getStatus().equals("aberto")) {
+            throw new RuntimeException("Nao e possivel remover produtos de um pedido fechado");
+        }
+
+        List<Product> productList = order.getProductList();
+        Optional<Product> productOptional = productList.stream()
+                .filter(p -> p.getName().equals(produto))
+                .findFirst();
+
+        if (productOptional.isEmpty()) {
+            throw new RuntimeException("Produto nao encontrado");
+        }
+        Product product = productOptional.get();
+
+        productList.remove(product);
+    }
+
+    public int getNumeroPedido(int cliente, int empresa, int indice) {
+        List<Order> orderList = orderRepository.listByCompanyId(empresa);
+
+        return orderList.stream()
+                .filter(o -> o.getCustomerId() == cliente)
+                .toList()
+                .get(indice)
+                .getId();
+    }
+
     public void encerrarSistema() throws IOException {
         userRepository.save();
         companyRepository.save();
         productRepository.save();
         orderRepository.save();
+        productRepository.save();
     }
 }
