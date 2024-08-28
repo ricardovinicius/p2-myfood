@@ -1,5 +1,13 @@
 package br.ufal.ic.p2.myfood.types;
 
+/**
+ * The class Unique is a utility class that represents a unique field of
+ * another Class. Is generic and can be used with any another type/class
+ * of Java. Is part of Persistent abstract class, that have util methods
+ * to handle with Unique fields.
+ *
+ * @author Ricardo Vinicius
+ */
 public class Unique<T> {
     final T value;
 
@@ -8,8 +16,7 @@ public class Unique<T> {
     }
 
     public Unique(String value) {
-        // You need to handle casting the value to T properly based on your use case
-        this.value = (T) value; // This is a simple approach, you can make it more sophisticated if needed
+        this.value = (T) value;
     }
 
     public T getValue() {

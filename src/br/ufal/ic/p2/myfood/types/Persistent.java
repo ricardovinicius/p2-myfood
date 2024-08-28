@@ -7,6 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Represents an abstract base class for persistent entities within the system.
+ * Each entity that extends this class will have a unique identifier (`id`) and
+ * a mechanism to retrieve fields that are marked as unique.
+ *
+ * @author Ricardo Vinicius
+ */
 public abstract class Persistent {
     protected int id;
 
