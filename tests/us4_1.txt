@@ -21,10 +21,10 @@
 # retorno:  Retorna o número do pedido
 #
 # getNumeroPedido(int: cliente, int: empresa, int indice)
-# descrição: Retorna o pedido em aberto de um cliente na empresa
+# descrição: Retorna o pedido de um cliente na empresa, ordenado de forma ao mais antigo vir primeiro no indice
 # retorno:  Retorna o número do produto
 #
-# adcionarProduto(int: numero, int produto)
+# adicionarProduto(int: numero, int produto)
 # descrição: Adciona um produto da empresa ao pedido
 # retorno:  Sem retorno
 #
@@ -48,7 +48,6 @@
 # Apaga toda a base de dados.
 zerarSistema
 
-# TODO: CPF inválido
 criarUsuario nome="RobertoDono" email="roberto@ufal.com.br" senha="123senha" endereco="Rua Exemplo N 321" cpf="544.732.410-68"
 id1=login email="roberto@ufal.com.br" senha="123senha"
 
@@ -62,7 +61,7 @@ p3=criarProduto empresa=${e1} nome="Refrigerante" valor=3.40  categoria="bebida"
 
 p4=criarProduto empresa=${e2} nome="Pastel de queijo" valor=5.00  categoria="alimento"
 
-criarUsuario nome="Carlos" email="carlos@ufal.com.br" senha="123senha" endereco="Rua Exemplo N 123"
+criarUsuario nome="Carlos" email="carlos@ufal.com.br"  senha="123senha" endereco="Rua Exemplo N 123"
 
 id2=login email="carlos@ufal.com.br" senha="123senha"
 
@@ -72,7 +71,7 @@ id2=login email="carlos@ufal.com.br" senha="123senha"
 ###################
 expectError "Dono de empresa nao pode fazer um pedido" criarPedido cliente=${id1} empresa=${e1}
 
-expectError "Nao existe pedido em aberto" adcionarProduto numero=9999 produto=${e1}
+expectError "Nao existe pedido em aberto" adicionarProduto numero=9999 produto=${e1}
 
 pe1=criarPedido cliente=${id2} empresa=${e1}
 
@@ -83,19 +82,19 @@ expectError "Nao e permitido ter dois pedidos em aberto para a mesma empresa" cr
 pe2=criarPedido cliente=${id2} empresa=${e2}
 
 ###################
-# testes de todas as combinações importantes para o comando adcionarProduto
+# testes de todas as combinações importantes para o comando adicionarProduto
 ###################
 
- adcionarProduto numero=${pe1} produto=${p1}
- adcionarProduto numero=${pe1} produto=${p2}
- adcionarProduto numero=${pe1} produto=${p3}
+ adicionarProduto numero=${pe1} produto=${p1}
+ adicionarProduto numero=${pe1} produto=${p2}
+ adicionarProduto numero=${pe1} produto=${p3}
 
-expectError "O produto nao pertence a essa empresa" adcionarProduto pedido=${pe2} produto=${p1}
+expectError "O produto nao pertence a essa empresa" adicionarProduto pedido=${pe2} produto=${p1}
 
 # O mesmo produto é adicionado várias vezes ao pedido.
-adcionarProduto numero=${pe2} produto=${p4}
-adcionarProduto numero=${pe2} produto=${p4}
-adcionarProduto numero=${pe2} produto=${p4}
+adicionarProduto numero=${pe2} produto=${p4}
+adicionarProduto numero=${pe2} produto=${p4}
+adicionarProduto numero=${pe2} produto=${p4}
 
 ###################
 # testes de todas as combinações importantes para o comando getPedidos
@@ -126,7 +125,7 @@ fecharPedido numero=${pe1}
 
 expect "preparando"  getPedidos pedido=${pe1} atributo="estado"
 
-expectError "Nao e possivel adcionar produtos a um pedido fechado"  adcionarProduto numero=${pe1} produto=${p1}
+expectError "Nao e possivel adcionar produtos a um pedido fechado"  adicionarProduto numero=${pe1} produto=${p1}
 
 # Abre um novo pedido agora que o anterior está fechado.
 pe3=criarPedido cliente=${id2} empresa=${e1}
