@@ -24,7 +24,7 @@ public class ProductRepository extends Repository<Product> {
     }
 
     public List<Product> listByCompanyId(int id) {
-        return list().stream().filter(p -> p.getCompanyId() == id).toList();
+        return list().stream().filter(p -> p.getCompany().getId() == id).toList();
     }
 
     public Optional<Product> getById(int id) {

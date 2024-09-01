@@ -32,6 +32,6 @@ public class CompanyRepository extends Repository<Company> {
     }
 
     public List<Company> listByOwnerId(int ownerId) {
-        return list().stream().filter(c -> c.getOwnerId() == ownerId).toList();
+        return list().stream().filter(c -> c.getOwner().getId() == ownerId).toList();
     }
 }

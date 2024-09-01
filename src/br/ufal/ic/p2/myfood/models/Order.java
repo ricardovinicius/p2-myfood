@@ -1,7 +1,5 @@
 package br.ufal.ic.p2.myfood.models;
 
-import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
-import br.ufal.ic.p2.myfood.repositories.UserRepository;
 import br.ufal.ic.p2.myfood.types.Persistent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -11,51 +9,39 @@ import java.util.Locale;
 
 public class Order extends Persistent {
     private static int idCounter = 1;
-    private int customerId;
-    private int companyId;
+    private User customer;
+    private Company company;
     private String status;
     private List<Product> productList;
 
     public Order() {}
 
-    private Order(int customerId, int companyId, String status, List<Product> productList) {
+    private Order(User customer, Company company, String status, List<Product> productList) {
         this.id = idCounter++;
-        this.customerId = customerId;
-        this.companyId = companyId;
+        this.customer = customer;
+        this.company = company;
         this.status = status;
         this.productList = productList;
     }
 
-    public static Order create(int customerId, int companyId) {
-        return new Order(customerId, companyId, "aberto", new ArrayList<>());
+    public static Order create(User customer, Company company) {
+        return new Order(customer, company, "aberto", new ArrayList<>());
     }
 
-    @JsonIgnore()
     public User getCustomer() {
-        UserRepository userRepository = UserRepository.getInstance();
-        return userRepository.getById(customerId).orElse(null);
+        return customer;
     }
 
-    public int getCustomerId() {
-        return customerId;
+    public void setCustomer(User customer) {
+        this.customer = customer;
     }
 
-    public void setCustomerId(int customerId) {
-        this.customerId = customerId;
-    }
-
-    @JsonIgnore()
     public Company getCompany() {
-        CompanyRepository companyRepository = CompanyRepository.getInstance();
-        return companyRepository.getById(companyId).orElse(null);
+        return company;
     }
 
-    public int getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(int companyId) {
-        this.companyId = companyId;
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public String getStatus() {

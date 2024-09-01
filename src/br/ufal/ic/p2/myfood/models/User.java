@@ -20,12 +20,14 @@ public abstract class User extends Persistent {
     private String name;
     private Unique<String> email;
     private String password;
+    private String dtype;
 
-    User(String name, String email, String password) {
+    User(String name, String email, String password, String dtype) {
         this.id = id_counter++;
         this.name = name;
         this.email = new Unique(email);
         this.password = password;
+        this.dtype = dtype;
     }
 
     public User() {
@@ -36,13 +38,12 @@ public abstract class User extends Persistent {
             throw new RuntimeException("Nome invalido");
         }
 
-        // Isso aqui é muita inconsistência da lógica de negócio :/
         if (email == null) {
             throw new RuntimeException("Email invalido");
         }
 
         if (!Validator.isValidEmail(email)) {
-            throw new RuntimeException("Formato de email invalido");
+            throw new RuntimeException("Email invalido");
         }
 
         if (Validator.isNullOrEmpty(password)) {
@@ -85,5 +86,9 @@ public abstract class User extends Persistent {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getDtype() {
+        return dtype;
     }
 }

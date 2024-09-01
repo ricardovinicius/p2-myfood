@@ -1,7 +1,6 @@
 package br.ufal.ic.p2.myfood.models;
 
 import br.ufal.ic.p2.myfood.utils.Validator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("owner")
@@ -12,7 +11,7 @@ public class Owner extends User {
     Owner() {}
 
     Owner(String name, String email, String password, String address, String cpf) {
-        super(name, email, password);
+        super(name, email, password, "owner");
         this.address = address;
         this.cpf = cpf;
     }

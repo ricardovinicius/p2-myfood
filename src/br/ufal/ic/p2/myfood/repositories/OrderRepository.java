@@ -1,7 +1,6 @@
 package br.ufal.ic.p2.myfood.repositories;
 
 import br.ufal.ic.p2.myfood.models.Order;
-import br.ufal.ic.p2.myfood.models.Product;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +28,6 @@ public class OrderRepository extends Repository<Order> {
     }
 
     public List<Order> listByCompanyId(int id) {
-        return list().stream().filter(o -> o.getCompanyId() == id).toList();
+        return list().stream().filter(o -> o.getCompany().getId() == id).toList();
     }
 }

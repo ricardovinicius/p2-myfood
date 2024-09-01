@@ -1,7 +1,6 @@
 package br.ufal.ic.p2.myfood.models;
 
 import br.ufal.ic.p2.myfood.utils.Validator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("customer")
@@ -11,7 +10,7 @@ public class Customer extends User {
     Customer() {}
 
     Customer(String name, String email, String password, String address) {
-        super(name, email, password);
+        super(name, email, password, "customer");
         this.address = address;
     }
 

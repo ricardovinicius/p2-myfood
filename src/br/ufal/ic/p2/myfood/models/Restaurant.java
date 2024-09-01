@@ -8,15 +8,15 @@ public class Restaurant extends Company {
 
     Restaurant() {}
 
-    Restaurant(String name, String address, String kitchenType, int owner_id) {
-        super(name, address, owner_id);
+    Restaurant(String name, String address, String kitchenType, User user) {
+        super(name, address, user);
         this.kitchenType = kitchenType;
     }
 
-    public static Restaurant create(String name, String address, String kitchenType, int owner_id) {
-        Company.create(name, address, owner_id);
+    public static Restaurant create(String name, String address, String kitchenType, User user) {
+        Company.create(name, address, user);
 
-        return new Restaurant(name, address, kitchenType, owner_id);
+        return new Restaurant(name, address, kitchenType, user);
     }
 
     public String getKitchenType() {

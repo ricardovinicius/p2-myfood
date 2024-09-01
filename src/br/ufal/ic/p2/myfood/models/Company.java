@@ -1,8 +1,6 @@
 package br.ufal.ic.p2.myfood.models;
 
-import br.ufal.ic.p2.myfood.repositories.UserRepository;
 import br.ufal.ic.p2.myfood.types.Persistent;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -18,18 +16,18 @@ public abstract class Company extends Persistent {
     private static int id_counter = 1;
     private String name;
     private String address;
-    private int ownerId;
+    private User owner;
 
     public Company() {}
 
-    Company(String name, String address, int ownerId) {
+    Company(String name, String address, User owner) {
         this.id = id_counter++;
         this.name = name;
         this.address = address;
-        this.ownerId = ownerId;
+        this.owner = owner;
     }
 
-    public static void create(String name, String address, int owner_id) {}
+    public static void create(String name, String address, User owner) {}
 
     public String getName() {
         return name;
@@ -43,18 +41,12 @@ public abstract class Company extends Persistent {
         this.address = address;
     }
 
-    @JsonIgnore()
     public User getOwner() {
-        UserRepository userRepository = UserRepository.getInstance();
-        return userRepository.getById(ownerId).orElse(null);
+        return owner;
     }
 
-    public int getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(int ownerId) {
-        this.ownerId = ownerId;
+    public void setOwner(Owner owner) {
+        this.owner = owner;
     }
 
     @Override

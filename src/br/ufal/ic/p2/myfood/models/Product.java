@@ -1,9 +1,7 @@
 package br.ufal.ic.p2.myfood.models;
 
-import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
 import br.ufal.ic.p2.myfood.types.Persistent;
 import br.ufal.ic.p2.myfood.utils.Validator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Locale;
 
@@ -12,19 +10,19 @@ public class Product extends Persistent {
     private String name;
     private float price;
     private String category;
-    private int companyId;
+    private Company company;
 
     public Product() {}
 
-    private Product(String name, float price, String category, int companyId) {
+    private Product(String name, float price, String category, Company company) {
         this.id = idCounter++;
         this.name = name;
         this.price = price;
         this.category = category;
-        this.companyId = companyId;
+        this.company = company;
     }
 
-    public static Product create(String name, float price, String category, int companyId) {
+    public static Product create(String name, float price, String category, Company company) {
         if (Validator.isNullOrEmpty(name)) {
             throw new IllegalArgumentException("Nome invalido");
         }
@@ -37,7 +35,7 @@ public class Product extends Persistent {
             throw new IllegalArgumentException("Valor invalido");
         }
 
-        return new Product(name, price, category, companyId);
+        return new Product(name, price, category, company);
     }
 
     public String getName() {
@@ -64,23 +62,12 @@ public class Product extends Persistent {
         this.category = category;
     }
 
-    public int getCompanyId() {
-        return companyId;
-    }
-
-    @JsonIgnore()
     public Company getCompany() {
-        CompanyRepository companyRepository = CompanyRepository.getInstance();
-
-        return companyRepository.list()
-                .stream()
-                .filter(c -> c.getId() == companyId)
-                .findFirst()
-                .orElse(null);
+        return company;
     }
 
-    public void setCompanyId(int companyId) {
-        this.companyId = companyId;
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public String getAttribute(String attribute) {

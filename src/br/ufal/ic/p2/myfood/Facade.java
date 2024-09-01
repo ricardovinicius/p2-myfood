@@ -94,7 +94,7 @@ public class Facade {
 
             User user = userOptional.get();
 
-            if (!(user instanceof Owner)) {
+            if (!(user.getDtype().equals("owner"))) {
                 throw new RuntimeException("Usuario nao pode criar uma empresa");
             }
 
@@ -103,7 +103,7 @@ public class Facade {
             if (sameNameRestaurantOptional.isPresent()) {
                 Company sameNameRestaurant = sameNameRestaurantOptional.get();
 
-                if (sameNameRestaurant.getOwnerId() != dono) {
+                if (sameNameRestaurant.getOwner().getId() != dono) {
                     throw new RuntimeException("Empresa com esse nome ja existe");
                 }
 
@@ -112,7 +112,7 @@ public class Facade {
                 }
             }
 
-            Restaurant restaurant = Restaurant.create(nome, endereco, tipoCozinha, dono);
+            Restaurant restaurant = Restaurant.create(nome, endereco, tipoCozinha, (Owner) user);
             companyRepository.add(restaurant);
 
             return restaurant.getId();
@@ -130,7 +130,7 @@ public class Facade {
 
         User user = userOptional.get();
 
-        if (!(user instanceof Owner)) {
+        if (!(user.getDtype().equals("owner"))) {
             throw new RuntimeException("Usuario nao pode criar uma empresa");
         }
 
@@ -146,6 +146,10 @@ public class Facade {
         try {
             index = Integer.parseInt(indice);
         } catch (RuntimeException e) {
+            throw new RuntimeException("Indice invalido");
+        }
+
+        if (index < 0) {
             throw new RuntimeException("Indice invalido");
         }
 
@@ -179,10 +183,6 @@ public class Facade {
         }
         Company company = companyOptional.get();
 
-        if (atributo == null) {
-            return "Atributo invalido";
-        }
-
         if (Validator.isNullOrEmpty(atributo)) {
             throw new RuntimeException("Atributo invalido");
         }
@@ -197,11 +197,18 @@ public class Facade {
     }
 
     public int criarProduto(int empresa, String nome, float valor, String categoria) {
-        Product product = Product.create(nome, valor, categoria, empresa);
+        Optional<Company> companyOptional = companyRepository.getById(empresa);
+
+        if (companyOptional.isEmpty()) {
+            throw new RuntimeException();
+        }
+        Company company = companyOptional.get();
+
+        Product product = Product.create(nome, valor, categoria, company);
 
         Optional<Product> sameNameProduct = productRepository.list()
                 .stream()
-                .filter(p -> p.getCompanyId() == empresa)
+                .filter(p -> p.getCompany().getId() == empresa)
                 .filter(p -> p.getName().equals(nome))
                 .findFirst();
 
@@ -291,14 +298,21 @@ public class Facade {
         }
         User user = userOptional.get();
 
-        if (user instanceof Owner) {
+        if (user.getDtype().equals("owner")) {
             throw new RuntimeException("Dono de empresa nao pode fazer um pedido");
         }
+
+        Optional<Company> companyOptional = companyRepository.getById(empresa);
+
+        if (companyOptional.isEmpty()) {
+            throw new RuntimeException();
+        }
+        Company company = companyOptional.get();
 
         List<Order> companyOrders = orderRepository.listByCompanyId(empresa);
 
         Optional<Order> existentOrder = companyOrders.stream()
-                .filter(o -> o.getCustomerId() == cliente)
+                .filter(o -> o.getCustomer().getId() == cliente)
                 .filter(o -> o.getStatus().equals("aberto"))
                 .findFirst();
 
@@ -306,13 +320,13 @@ public class Facade {
             throw new RuntimeException("Nao e permitido ter dois pedidos em aberto para a mesma empresa");
         }
 
-        Order order = Order.create(cliente, empresa);
+        Order order = Order.create(user, company);
         orderRepository.add(order);
 
         return order.getId();
     }
 
-    public void adcionarProduto(int numero, int produto) {
+    public void adicionarProduto(int numero, int produto) {
         Optional<Order> orderOptional = orderRepository.getById(numero);
 
         if (orderOptional.isEmpty()) {
@@ -325,7 +339,7 @@ public class Facade {
         }
 
         List<Product> productList = productRepository
-                .listByCompanyId(order.getCompanyId());
+                .listByCompanyId(order.getCompany().getId());
 
         Optional<Product> productOptional = productList
                 .stream()
@@ -407,7 +421,7 @@ public class Facade {
         List<Order> orderList = orderRepository.listByCompanyId(empresa);
 
         return orderList.stream()
-                .filter(o -> o.getCustomerId() == cliente)
+                .filter(o -> o.getCustomer().getId() == cliente)
                 .toList()
                 .get(indice)
                 .getId();
