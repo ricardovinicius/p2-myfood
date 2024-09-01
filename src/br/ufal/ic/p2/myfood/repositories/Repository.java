@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @param <T> the type of the entities managed by this repository, which must extend {@link Persistent}.
  */
-public class Repository<T extends Persistent> {
+public abstract class Repository<T extends Persistent> {
     private final List<T> listItem = new ArrayList<>();
     private final String DATA_FOLDER_PATH = "./data";
     Class<T> clazz;
