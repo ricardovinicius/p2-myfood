@@ -108,4 +108,4 @@ expectError "Login ou senha invalidos" login email=  senha="abc"
 expectError "Login ou senha invalidos" login email="carlos@ufal.com.br" senha=  
 
 encerrarSistema
-quit
+
