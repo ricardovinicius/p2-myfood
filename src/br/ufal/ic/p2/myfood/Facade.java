@@ -1,6 +1,7 @@
 package br.ufal.ic.p2.myfood;
 
 import br.ufal.ic.p2.myfood.exceptions.UniqueFieldException;
+import br.ufal.ic.p2.myfood.managers.UserManager;
 import br.ufal.ic.p2.myfood.models.*;
 import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
 import br.ufal.ic.p2.myfood.repositories.OrderRepository;
@@ -14,6 +15,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class Facade {
+    UserManager userManager = new UserManager();
+
     UserRepository userRepository = UserRepository.getInstance();
     CompanyRepository companyRepository = CompanyRepository.getInstance();
     ProductRepository productRepository = ProductRepository.getInstance();
@@ -28,28 +31,14 @@ public class Facade {
     }
 
     public String getAtributoUsuario(int id, String nome) {
-        Optional<User> userOptional = userRepository.getById(id);
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException("Usuario nao cadastrado.");
-        }
-        User user = userOptional.get();
-
-        return user.getAttribute(nome);
+        return userManager.getUserAttribute(id, nome);
     }
 
     public void criarUsuario(String nome,
                              String email,
                              String senha,
                              String endereco) {
-        Customer customer = Customer.create(nome, email, senha, endereco);
-
-        try {
-            userRepository.add(customer);
-        } catch (UniqueFieldException e) {
-            if (e.getField().getName().equals("email")) {
-                throw new RuntimeException("Conta com esse email ja existe");
-            }
-        }
+        userManager.createCustomer(nome, email, senha, endereco);
     }
 
     public void criarUsuario(String nome,
@@ -57,31 +46,11 @@ public class Facade {
                              String senha,
                              String endereco,
                              String cpf) {
-        Owner owner = Owner.create(nome, email, senha, endereco, cpf);
-
-        try {
-            userRepository.add(owner);
-        } catch (UniqueFieldException e) {
-            throw new RuntimeException("Conta com esse email ja existe");
-        }
+        userManager.createOwner(nome, email, senha, endereco, cpf);
     }
 
     public int login(String email, String senha) {
-        Optional<User> userOptional = userRepository.getByEmail(email);
-
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException("Login ou senha invalidos");
-        }
-
-        User user = userOptional.get();
-
-        boolean loginSuccessful = user.login(email, senha);
-
-        if (!loginSuccessful) {
-            throw new RuntimeException("Login ou senha invalidos");
-        }
-
-        return user.getId();
+        return userManager.login(email, senha);
     }
 
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String tipoCozinha) {

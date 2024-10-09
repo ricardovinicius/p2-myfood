@@ -51,11 +51,6 @@ public abstract class User extends Persistent {
         }
     }
 
-    public boolean login(String email, String password) {
-        return this.password.equals(password);
-    }
-
-
     public String getName() {
         return name;
     }
