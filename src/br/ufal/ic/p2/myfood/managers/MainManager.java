@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainManager {
+public class MainManager extends Manager {
     private List<Manager> managerInstances = new ArrayList<Manager>();
 
     public MainManager() {
@@ -13,7 +13,7 @@ public class MainManager {
         managerInstances.add(userManager);
     }
 
-    public void cleanSystem() {
+    public void cleanRepository() {
         for (Manager manager : managerInstances) {
             try {
                 manager.cleanRepository();
