@@ -19,6 +19,10 @@ public class UserManager extends Manager {
         userRepository.clean();
     }
 
+    void saveRepository() throws IOException {
+        userRepository.save();
+    }
+
     public String getUserAttribute(int user_id, String attribute_name) {
         Optional<User> userOptional = userRepository.getById(user_id);
         if (userOptional.isEmpty()) {

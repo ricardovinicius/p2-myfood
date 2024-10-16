@@ -1,13 +1,12 @@
 package br.ufal.ic.p2.myfood;
 
-import br.ufal.ic.p2.myfood.exceptions.UniqueFieldException;
-import br.ufal.ic.p2.myfood.managers.UserManager;
+import br.ufal.ic.p2.myfood.managers.*;
 import br.ufal.ic.p2.myfood.models.*;
 import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
 import br.ufal.ic.p2.myfood.repositories.OrderRepository;
 import br.ufal.ic.p2.myfood.repositories.ProductRepository;
 import br.ufal.ic.p2.myfood.repositories.UserRepository;
-import br.ufal.ic.p2.myfood.utils.Validator;
+import br.ufal.ic.p2.myfood.utils.Validators;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,19 +14,14 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class Facade {
+    MainManager mainManager = new MainManager();
     UserManager userManager = new UserManager();
-
-    UserRepository userRepository = UserRepository.getInstance();
-    CompanyRepository companyRepository = CompanyRepository.getInstance();
-    ProductRepository productRepository = ProductRepository.getInstance();
-    OrderRepository orderRepository = OrderRepository.getInstance();
+    CompanyManager companyManager = new CompanyManager();
+    ProductManager productManager = new ProductManager();
+    OrderManager orderManager = new OrderManager();
 
     public void zerarSistema() throws IOException {
-        userRepository.clean();
-        companyRepository.clean();
-        productRepository.clean();
-        orderRepository.clean();
-        productRepository.clean();
+        mainManager.cleanRepository();
     }
 
     public String getAtributoUsuario(int id, String nome) {
@@ -54,353 +48,62 @@ public class Facade {
     }
 
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String tipoCozinha) {
-        if (tipoEmpresa.equals("restaurante")) {
-            Optional<User> userOptional = userRepository.getById(dono);
-
-            if (userOptional.isEmpty()) {
-                throw new RuntimeException();
-            }
-
-            User user = userOptional.get();
-
-            if (!(user.getDtype().equals("owner"))) {
-                throw new RuntimeException("Usuario nao pode criar uma empresa");
-            }
-
-            Optional<Company> sameNameRestaurantOptional = companyRepository.getByName(nome);
-
-            if (sameNameRestaurantOptional.isPresent()) {
-                Company sameNameRestaurant = sameNameRestaurantOptional.get();
-
-                if (sameNameRestaurant.getOwner().getId() != dono) {
-                    throw new RuntimeException("Empresa com esse nome ja existe");
-                }
-
-                if (sameNameRestaurant.getAddress().equals(endereco)) {
-                    throw new RuntimeException("Proibido cadastrar duas empresas com o mesmo nome e local");
-                }
-            }
-
-            Restaurant restaurant = Restaurant.create(nome, endereco, tipoCozinha, (Owner) user);
-            companyRepository.add(restaurant);
-
-            return restaurant.getId();
-        }
-
-        return -1;
+        return companyManager.createCompany(tipoEmpresa, dono, nome, endereco, tipoCozinha);
     }
 
     public String getEmpresasDoUsuario(int idDono) {
-        Optional<User> userOptional = userRepository.getById(idDono);
-
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException();
-        }
-
-        User user = userOptional.get();
-
-        if (!(user.getDtype().equals("owner"))) {
-            throw new RuntimeException("Usuario nao pode criar uma empresa");
-        }
-
-        List<Company> companies = companyRepository.listByOwnerId(idDono);
-
-        // TODO: Do this String format in a better way
-        return "{" + companies.toString() + "}";
+        return companyManager.listCompanyByOwnerId(idDono);
     }
 
     public int getIdEmpresa(int idDono, String nome, String indice) {
-        int index;
-
-        try {
-            index = Integer.parseInt(indice);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Indice invalido");
-        }
-
-        if (index < 0) {
-            throw new RuntimeException("Indice invalido");
-        }
-
-        if (Validator.isNullOrEmpty(nome)) {
-            throw new RuntimeException("Nome invalido");
-        }
-
-        List<Company> companies = companyRepository.listByOwnerId(idDono);
-        List<Company> companiesWithSearchedName = companies.stream()
-                .filter(c -> c.getName().equals(nome))
-                .toList();
-
-        if (companiesWithSearchedName.isEmpty()) {
-            throw new RuntimeException("Nao existe empresa com esse nome");
-        }
-
-        Company company;
-        try {
-            company = companiesWithSearchedName.get(index);
-        } catch(IndexOutOfBoundsException e) {
-            throw new RuntimeException("Indice maior que o esperado");
-        }
-
-        return company.getId();
+        return companyManager.getCompanyId(idDono, nome, indice);
     }
 
     public String getAtributoEmpresa(int empresa, String atributo) {
-        Optional<Company> companyOptional = companyRepository.getById(empresa);
-        if (companyOptional.isEmpty()) {
-            throw new RuntimeException("Empresa nao cadastrada");
-        }
-        Company company = companyOptional.get();
-
-        if (Validator.isNullOrEmpty(atributo)) {
-            throw new RuntimeException("Atributo invalido");
-        }
-
-        String attribute = company.getAttribute(atributo);
-
-        if (attribute == null) {
-            throw new RuntimeException("Atributo invalido");
-        }
-
-        return attribute;
+        return companyManager.getCompanyAttribute(empresa, atributo);
     }
 
     public int criarProduto(int empresa, String nome, float valor, String categoria) {
-        Optional<Company> companyOptional = companyRepository.getById(empresa);
-
-        if (companyOptional.isEmpty()) {
-            throw new RuntimeException();
-        }
-        Company company = companyOptional.get();
-
-        Product product = Product.create(nome, valor, categoria, company);
-
-        Optional<Product> sameNameProduct = productRepository.list()
-                .stream()
-                .filter(p -> p.getCompany().getId() == empresa)
-                .filter(p -> p.getName().equals(nome))
-                .findFirst();
-
-        if (sameNameProduct.isPresent()) {
-            throw new RuntimeException("Ja existe um produto com esse nome para essa empresa");
-        }
-
-        productRepository.add(product);
-
-        return product.getId();
+        return productManager.createProduct(empresa, nome, valor, categoria);
     }
 
     public void editarProduto(int produto, String nome, float valor, String categoria) {
-        if (Validator.isNullOrEmpty(nome)) {
-            throw new RuntimeException("Nome invalido");
-        }
-
-        if (Validator.isNullOrEmpty(categoria)) {
-            throw new RuntimeException("Categoria invalido");
-        }
-
-        if (valor < 0) {
-            throw new RuntimeException("Valor invalido");
-        }
-
-        Optional<Product> product = productRepository.list()
-                .stream()
-                .filter(p -> p.getId() == produto)
-                .findFirst();
-
-        if (product.isEmpty()) {
-            throw new RuntimeException("Produto nao cadastrado");
-        }
-
-        Product productObj = product.get();
-
-        productObj.setName(nome);
-        productObj.setPrice(valor);
-        productObj.setCategory(categoria);
-
-        try {
-            // productRepository.update(productObj);
-        } catch (NoSuchElementException e) {
-            throw new RuntimeException("Produto nao cadastrado");
-        }
+        productManager.updateProduct(produto, nome, valor, categoria);
     }
 
     public String getProduto(String nome, int empresa, String atributo) {
-        Optional<Product> productOptional = productRepository.listByCompanyId(empresa)
-                .stream()
-                .filter(p -> p.getName().equals(nome))
-                .findFirst();
-
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("Produto nao encontrado");
-        }
-
-        Product product = productOptional.get();
-
-        String productAttribute = product.getAttribute(atributo);
-
-        if (productAttribute == null) {
-            throw new RuntimeException("Atributo nao existe");
-        }
-
-        return productAttribute;
+        return productManager.getProduct(nome, empresa, atributo);
     }
 
     public String listarProdutos(int empresa) {
-        Optional<Company> company = companyRepository.getById(empresa);
-
-        if (company.isEmpty()) {
-            throw new RuntimeException("Empresa nao encontrada");
-        }
-
-        List<Product> products = productRepository.listByCompanyId(empresa);
-
-        // TODO: Melhorar o jeito que retorna essa String
-        return "{" + products.toString() + "}";
+        return productManager.listProducts(empresa);
     }
 
     public int criarPedido(int cliente, int empresa) {
-        Optional<User> userOptional = userRepository.getById(cliente);
-
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException();
-        }
-        User user = userOptional.get();
-
-        if (user.getDtype().equals("owner")) {
-            throw new RuntimeException("Dono de empresa nao pode fazer um pedido");
-        }
-
-        Optional<Company> companyOptional = companyRepository.getById(empresa);
-
-        if (companyOptional.isEmpty()) {
-            throw new RuntimeException();
-        }
-        Company company = companyOptional.get();
-
-        List<Order> companyOrders = orderRepository.listByCompanyId(empresa);
-
-        Optional<Order> existentOrder = companyOrders.stream()
-                .filter(o -> o.getCustomer().getId() == cliente)
-                .filter(o -> o.getStatus().equals("aberto"))
-                .findFirst();
-
-        if (existentOrder.isPresent()) {
-            throw new RuntimeException("Nao e permitido ter dois pedidos em aberto para a mesma empresa");
-        }
-
-        Order order = Order.create(user, company);
-        orderRepository.add(order);
-
-        return order.getId();
+        return orderManager.createOrder(cliente, empresa);
     }
 
     public void adicionarProduto(int numero, int produto) {
-        Optional<Order> orderOptional = orderRepository.getById(numero);
-
-        if (orderOptional.isEmpty()) {
-            throw new RuntimeException("Nao existe pedido em aberto");
-        }
-        Order order = orderOptional.get();
-
-        if (order.getStatus().equals("preparando")) {
-            throw new RuntimeException("Nao e possivel adcionar produtos a um pedido fechado");
-        }
-
-        List<Product> productList = productRepository
-                .listByCompanyId(order.getCompany().getId());
-
-        Optional<Product> productOptional = productList
-                .stream()
-                .filter(p -> p.getId() == produto)
-                .findFirst();
-
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("O produto nao pertence a essa empresa");
-        }
-        Product product = productOptional.get();
-
-        order.getProductList().add(product);
+        orderManager.addProductToOrder(numero, produto);
     }
 
     public String getPedidos(int numero, String atributo) {
-        Optional<Order> orderOptional = orderRepository.getById(numero);
-
-        if (orderOptional.isEmpty()) {
-            throw new RuntimeException("");
-        }
-        Order order = orderOptional.get();
-
-        if (Validator.isNullOrEmpty(atributo)) {
-            throw new RuntimeException("Atributo invalido");
-        }
-
-        String attribute = order.getAttribute(atributo);
-
-        if (attribute == null) {
-            throw new RuntimeException("Atributo nao existe");
-        }
-
-        return attribute;
+        return orderManager.getOrders(numero, atributo);
     }
 
     public void fecharPedido(int numero) {
-        Optional<Order> orderOptional = orderRepository.getById(numero);
-
-        if (orderOptional.isEmpty()) {
-            throw new RuntimeException("Pedido nao encontrado");
-        }
-        Order order = orderOptional.get();
-
-        order.setStatus("preparando");
-
-        // orderRepository.update(order);
+        orderManager.closeOrder(numero);
     }
 
     public void removerProduto(int pedido, String produto) {
-        if (Validator.isNullOrEmpty(produto)) {
-            throw new RuntimeException("Produto invalido");
-        }
-
-        Optional<Order> orderOptional = orderRepository.getById(pedido);
-
-        if (orderOptional.isEmpty()) {
-            throw new RuntimeException();
-        }
-        Order order = orderOptional.get();
-
-        if (!order.getStatus().equals("aberto")) {
-            throw new RuntimeException("Nao e possivel remover produtos de um pedido fechado");
-        }
-
-        List<Product> productList = order.getProductList();
-        Optional<Product> productOptional = productList.stream()
-                .filter(p -> p.getName().equals(produto))
-                .findFirst();
-
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("Produto nao encontrado");
-        }
-        Product product = productOptional.get();
-
-        productList.remove(product);
+        orderManager.removeProductFromOrder(pedido, produto);
     }
 
     public int getNumeroPedido(int cliente, int empresa, int indice) {
-        List<Order> orderList = orderRepository.listByCompanyId(empresa);
-
-        return orderList.stream()
-                .filter(o -> o.getCustomer().getId() == cliente)
-                .toList()
-                .get(indice)
-                .getId();
+        return orderManager.getOrderId(cliente, empresa, indice);
     }
 
     public void encerrarSistema() throws IOException {
-        userRepository.save();
-        companyRepository.save();
-        productRepository.save();
-        orderRepository.save();
-        productRepository.save();
+        mainManager.saveRepository();
     }
 }

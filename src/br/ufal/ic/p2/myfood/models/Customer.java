@@ -1,6 +1,6 @@
 package br.ufal.ic.p2.myfood.models;
 
-import br.ufal.ic.p2.myfood.utils.Validator;
+import br.ufal.ic.p2.myfood.utils.Validators;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("customer")
@@ -18,7 +18,7 @@ public class Customer extends User {
     public static Customer create(String name, String email, String password, String address) {
         User.create(name, email, password);
 
-        if (Validator.isNullOrEmpty(address)) {
+        if (Validators.isNullOrEmpty(address)) {
             throw new RuntimeException("Endereco invalido");
         }
 

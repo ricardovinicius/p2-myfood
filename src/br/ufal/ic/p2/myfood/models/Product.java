@@ -1,7 +1,8 @@
 package br.ufal.ic.p2.myfood.models;
 
 import br.ufal.ic.p2.myfood.types.Persistent;
-import br.ufal.ic.p2.myfood.utils.Validator;
+import br.ufal.ic.p2.myfood.utils.Validators;
+import br.ufal.ic.p2.myfood.validators.ProductValidators;
 
 import java.util.Locale;
 
@@ -23,17 +24,7 @@ public class Product extends Persistent {
     }
 
     public static Product create(String name, float price, String category, Company company) {
-        if (Validator.isNullOrEmpty(name)) {
-            throw new IllegalArgumentException("Nome invalido");
-        }
-
-        if (Validator.isNullOrEmpty(category)) {
-            throw new IllegalArgumentException("Categoria invalido");
-        }
-
-        if (price < 0) {
-            throw new IllegalArgumentException("Valor invalido");
-        }
+        ProductValidators.validateFields(name, price, category);
 
         return new Product(name, price, category, company);
     }

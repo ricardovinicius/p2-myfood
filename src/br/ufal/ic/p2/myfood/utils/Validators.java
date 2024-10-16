@@ -1,5 +1,7 @@
 package br.ufal.ic.p2.myfood.utils;
 
+import br.ufal.ic.p2.myfood.exceptions.InvalidIndexException;
+
 import java.util.regex.Pattern;
 
 /**
@@ -10,7 +12,7 @@ import java.util.regex.Pattern;
  *
  * @since 1.0
  */
-public class Validator {
+public class Validators {
     /**
      * Checks if a given string is either {@code null} or empty.
      *
@@ -43,5 +45,21 @@ public class Validator {
         return Pattern.compile(regexPattern)
                 .matcher(s)
                 .matches();
+    }
+
+    public static int parseIndex(String stringIndex) {
+        int index;
+
+        try {
+            index = Integer.parseInt(stringIndex);
+        } catch (RuntimeException e) {
+            throw new InvalidIndexException("Indice invalido");
+        }
+
+        if (index < 0) {
+            throw new InvalidIndexException("Indice invalido");
+        }
+
+        return index;
     }
 }

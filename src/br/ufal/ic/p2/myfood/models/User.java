@@ -1,8 +1,9 @@
 package br.ufal.ic.p2.myfood.models;
 
+import br.ufal.ic.p2.myfood.exceptions.user.InvalidUserNameException;
 import br.ufal.ic.p2.myfood.types.Persistent;
 import br.ufal.ic.p2.myfood.types.Unique;
-import br.ufal.ic.p2.myfood.utils.Validator;
+import br.ufal.ic.p2.myfood.utils.Validators;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -34,19 +35,19 @@ public abstract class User extends Persistent {
     }
 
     static void create(String name, String email, String password) {
-        if (Validator.isNullOrEmpty(name)) {
-            throw new RuntimeException("Nome invalido");
+        if (Validators.isNullOrEmpty(name)) {
+            throw new InvalidUserNameException("Nome invalido");
         }
 
         if (email == null) {
             throw new RuntimeException("Email invalido");
         }
 
-        if (!Validator.isValidEmail(email)) {
+        if (!Validators.isValidEmail(email)) {
             throw new RuntimeException("Email invalido");
         }
 
-        if (Validator.isNullOrEmpty(password)) {
+        if (Validators.isNullOrEmpty(password)) {
             throw new RuntimeException("Senha invalido");
         }
     }
