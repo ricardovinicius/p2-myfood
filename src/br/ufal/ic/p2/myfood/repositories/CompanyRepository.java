@@ -1,6 +1,7 @@
 package br.ufal.ic.p2.myfood.repositories;
 
 import br.ufal.ic.p2.myfood.models.Company;
+import br.ufal.ic.p2.myfood.models.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,5 +34,9 @@ public class CompanyRepository extends Repository<Company> {
 
     public List<Company> listByOwnerId(int ownerId) {
         return list().stream().filter(c -> c.getOwner().getId() == ownerId).toList();
+    }
+
+    public List<Company> listByDeliveryId(int deliveryId) {
+        return list().stream().filter(c -> c.getDeliveryList().stream().anyMatch(user -> user.getId() == deliveryId)).toList();
     }
 }

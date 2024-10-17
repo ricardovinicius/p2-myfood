@@ -119,6 +119,14 @@ public class Facade {
         orderManager.closeOrder(numero);
     }
 
+    public void liberarPedido(int numero) {
+        orderManager.releaseOrder(numero);
+    }
+
+    public int obterPedido(int entregador) {
+        return orderManager.getLastOrder(entregador);
+    }
+
     public void removerProduto(int pedido, String produto) {
         orderManager.removeProductFromOrder(pedido, produto);
     }

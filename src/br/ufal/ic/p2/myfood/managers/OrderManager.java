@@ -5,6 +5,7 @@ import br.ufal.ic.p2.myfood.exceptions.NotFoundObjectException;
 import br.ufal.ic.p2.myfood.exceptions.order.ClosedOrderException;
 import br.ufal.ic.p2.myfood.exceptions.order.DuplicateOrderException;
 import br.ufal.ic.p2.myfood.exceptions.order.OwnerCreateOrderException;
+import br.ufal.ic.p2.myfood.exceptions.user.NullCompanyUser;
 import br.ufal.ic.p2.myfood.models.Company;
 import br.ufal.ic.p2.myfood.models.Order;
 import br.ufal.ic.p2.myfood.models.Product;
@@ -14,9 +15,11 @@ import br.ufal.ic.p2.myfood.repositories.OrderRepository;
 import br.ufal.ic.p2.myfood.repositories.ProductRepository;
 import br.ufal.ic.p2.myfood.repositories.UserRepository;
 import br.ufal.ic.p2.myfood.validators.CommonValidators;
+import br.ufal.ic.p2.myfood.validators.CompanyValidators;
 import br.ufal.ic.p2.myfood.validators.OrderValidators;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,6 +128,19 @@ public class OrderManager extends Manager {
         order.setStatus("preparando");
     }
 
+    public void releaseOrder(int orderId) {
+        Optional<Order> orderOptional = orderRepository.getById(orderId);
+
+        if (orderOptional.isEmpty()) {
+            throw new NotFoundObjectException("Pedido nao encontrado");
+        }
+        Order order = orderOptional.get();
+
+        OrderValidators.orderCanBeReleased(order);
+
+        order.setStatus("pronto");
+    }
+
     public void removeProductFromOrder(int orderId, String productName) {
         if (CommonValidators.isNullOrEmpty(productName)) {
             throw new IllegalArgumentException("Produto invalido");
@@ -157,5 +173,40 @@ public class OrderManager extends Manager {
                 .toList()
                 .get(index)
                 .getId();
+    }
+
+    public int getLastOrder(int userId) {
+        UserRepository userRepository = UserRepository.getInstance();
+        User user = userRepository.getById(userId).get();
+
+        CompanyValidators.userCanDelivery(user);
+
+        CompanyRepository companyRepository = CompanyRepository.getInstance();
+        List<Company> userCompanies = companyRepository.listByDeliveryId(userId);
+
+        if (userCompanies.isEmpty()) {
+            throw new NullCompanyUser("Entregador nao estar em nenhuma empresa.");
+        }
+
+        List<Order> orderList = new ArrayList<>();
+        for (Company company : userCompanies) {
+            orderList.addAll(orderRepository.listByCompanyId(company.getId()));
+        }
+
+        orderList.sort((o1, o2) -> {
+            // Prioridade para farmácia
+            boolean isDrugstore1 = o1.getCompany().getDtype().equals("drugstore");
+            boolean isDrugstore2 = o2.getCompany().getDtype().equals("drugstore");
+
+            // Se ambos forem ou não farmácias, ordene por data de criação
+            if (isDrugstore1 == isDrugstore2) {
+                return Integer.compare(o1.getId(), o2.getId());
+            }
+
+            // Caso contrário, dê prioridade para farmácia
+            return isDrugstore1 ? -1 : 1;
+        });
+
+        return orderList.getFirst().getId();
     }
 }
