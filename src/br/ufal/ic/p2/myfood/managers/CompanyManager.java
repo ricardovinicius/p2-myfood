@@ -3,14 +3,14 @@ package br.ufal.ic.p2.myfood.managers;
 import br.ufal.ic.p2.myfood.exceptions.InvalidAttributeException;
 import br.ufal.ic.p2.myfood.exceptions.NotFoundObjectException;
 import br.ufal.ic.p2.myfood.exceptions.company.*;
-import br.ufal.ic.p2.myfood.models.Company;
-import br.ufal.ic.p2.myfood.models.Restaurant;
-import br.ufal.ic.p2.myfood.models.User;
+import br.ufal.ic.p2.myfood.models.*;
 import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
 import br.ufal.ic.p2.myfood.repositories.UserRepository;
-import br.ufal.ic.p2.myfood.utils.Validators;
+import br.ufal.ic.p2.myfood.utils.Parsers;
+import br.ufal.ic.p2.myfood.validators.CommonValidators;
 import br.ufal.ic.p2.myfood.validators.CompanyValidators;
 
+import javax.xml.validation.Validator;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -29,8 +29,9 @@ public class CompanyManager extends Manager {
         companyRepository.save();
     }
 
-    public int createCompany(String tipoEmpresa, int dono, String nome, String endereco, String tipoCozinha) {
-        Optional<User> userOptional = userRepository.getById(dono);
+    public int createCompany(String companyType, int ownerId, String companyName, String address, String subtype,
+                             String openingHour, String closingHour, boolean open24hours, int employees) {
+        Optional<User> userOptional = userRepository.getById(ownerId);
 
         if (userOptional.isEmpty()) {
             return -1;
@@ -39,17 +40,29 @@ public class CompanyManager extends Manager {
         User user = userOptional.get();
 
         CompanyValidators.userCanCreateCompany(user);
+        CompanyValidators.sameNameCompany(companyName, user, address);
 
-        if (tipoEmpresa.equals("restaurante")) {
-            CompanyValidators.sameNameRestaurant(nome, user, endereco);
-            Restaurant restaurant = Restaurant.create(nome, endereco, tipoCozinha, user);
-
-            companyRepository.add(restaurant);
-
-            return restaurant.getId();
+        if (CommonValidators.isNullOrEmpty(companyType)) {
+            throw new IllegalArgumentException("Tipo de empresa invalido");
         }
 
-        return -1;
+        Company company = null;
+
+        if (companyType.equals("restaurante")) {
+            company = Restaurant.create(companyName, address, subtype, user);
+        }
+
+        if (companyType.equals("mercado")) {
+            company = Market.create(companyName, address, user, openingHour, closingHour, subtype);
+        }
+
+        if (companyType.equals("farmacia")) {
+            company = DrugStore.create(companyName, address, user, open24hours, employees);
+        }
+
+        companyRepository.add(company);
+
+        return company.getId();
     }
 
     public String listCompanyByOwnerId(int ownerId) {
@@ -70,9 +83,9 @@ public class CompanyManager extends Manager {
     }
 
     public int getCompanyId(int ownerId, String companyName, String listIndex) {
-        int index = Validators.parseIndex(listIndex);
+        int index = CommonValidators.parseIndex(listIndex);
 
-        if (Validators.isNullOrEmpty(companyName)) {
+        if (CommonValidators.isNullOrEmpty(companyName)) {
             throw new InvalidCompanyNameException("Nome invalido");
         }
 
@@ -102,7 +115,7 @@ public class CompanyManager extends Manager {
         }
         Company company = companyOptional.get();
 
-        if (Validators.isNullOrEmpty(attributeName)) {
+        if (CommonValidators.isNullOrEmpty(attributeName)) {
             throw new InvalidAttributeException("Atributo invalido");
         }
 
@@ -113,5 +126,57 @@ public class CompanyManager extends Manager {
         }
 
         return attribute;
+    }
+
+    public void updateMarketTime(int companyId, String openingHour, String closingHour) {
+        if (!CommonValidators.isValidTimeFormat(openingHour) || !CommonValidators.isValidTimeFormat(closingHour)) {
+            throw new InvalidAttributeException("Formato de hora invalido");
+        }
+
+        if (!CommonValidators.isValidTimeRange(openingHour, closingHour)) {
+            throw new InvalidAttributeException("Horario invalido");
+        }
+
+        Optional<Company> companyOptional = companyRepository.getById(companyId);
+        if (companyOptional.isEmpty()) {
+            throw new NotFoundObjectException("Empresa nao cadastrada");
+        }
+        Company company = companyOptional.get();
+
+        if (!company.getDtype().equals("market")) {
+            throw new IllegalArgumentException("Nao e um mercado valido");
+        }
+
+        Market market = (Market) company;
+        market.setOpeningHour(openingHour);
+        market.setClosingHour(closingHour);
+    }
+
+    public void registerDelivery(int companyId, int deliveryId) {
+        Optional<Company> companyOptional = companyRepository.getById(companyId);
+        if (companyOptional.isEmpty()) {
+            throw new NotFoundObjectException("Empresa nao cadastrada");
+        }
+        Company company = companyOptional.get();
+
+        Optional<User> userOptional = userRepository.getById(deliveryId);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundObjectException("Entregador nao cadastrado");
+        }
+        User user = userOptional.get();
+
+        CompanyValidators.userCanDelivery(user);
+
+        company.getDeliveryList().add(user);
+    }
+
+    public String getDelivery(int companyId) {
+        Optional<Company> companyOptional = companyRepository.getById(companyId);
+        if (companyOptional.isEmpty()) {
+            throw new NotFoundObjectException("Empresa nao cadastrada");
+        }
+        Company company = companyOptional.get();
+
+        return Parsers.deliveryListParser(company.getDeliveryList());
     }
 }

@@ -16,14 +16,20 @@ public class CompanyValidators {
         }
     }
 
-    public static void sameNameRestaurant(String restaurantName, User user, String address) throws SameNameAndAddressCompanyException,
+    public static void userCanDelivery(User user) throws IllegalArgumentException {
+        if (!(user.getDtype().equals("delivery"))) {
+            throw new IllegalArgumentException("Usuario nao e um entregador");
+        }
+    }
+
+    public static void sameNameCompany(String companyName, User user, String address) throws SameNameAndAddressCompanyException,
             SameNameCompanyException {
         CompanyRepository companyRepository = CompanyRepository.getInstance();
 
-        Optional<Company> sameNameRestaurantOptional = companyRepository.getByName(restaurantName);
+        Optional<Company> sameNameCompanyOptional = companyRepository.getByName(companyName);
 
-        if (sameNameRestaurantOptional.isPresent()) {
-            Company sameNameRestaurant = sameNameRestaurantOptional.get();
+        if (sameNameCompanyOptional.isPresent()) {
+            Company sameNameRestaurant = sameNameCompanyOptional.get();
 
             if (sameNameRestaurant.getOwner().getId() != user.getId()) {
                 throw new SameNameCompanyException("Empresa com esse nome ja existe");

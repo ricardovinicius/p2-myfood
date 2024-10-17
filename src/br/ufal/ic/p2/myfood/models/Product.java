@@ -1,7 +1,6 @@
 package br.ufal.ic.p2.myfood.models;
 
 import br.ufal.ic.p2.myfood.types.Persistent;
-import br.ufal.ic.p2.myfood.utils.Validators;
 import br.ufal.ic.p2.myfood.validators.ProductValidators;
 
 import java.util.Locale;

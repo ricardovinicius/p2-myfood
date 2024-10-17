@@ -9,7 +9,7 @@ public class Restaurant extends Company {
     Restaurant() {}
 
     Restaurant(String name, String address, String kitchenType, User user) {
-        super(name, address, user);
+        super(name, address, user, "restaurant");
         this.kitchenType = kitchenType;
     }
 

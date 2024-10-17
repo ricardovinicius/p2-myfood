@@ -1,4 +1,4 @@
-package br.ufal.ic.p2.myfood.utils;
+package br.ufal.ic.p2.myfood.validators;
 
 import br.ufal.ic.p2.myfood.exceptions.InvalidIndexException;
 
@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  *
  * @since 1.0
  */
-public class Validators {
+public class CommonValidators {
     /**
      * Checks if a given string is either {@code null} or empty.
      *
@@ -62,4 +62,42 @@ public class Validators {
 
         return index;
     }
+
+    public static boolean isValidTimeFormat(String s) {
+        if (s == null) {
+            return true; // Isso nao faz sentido, mas eu preciso fazer isso por conta da especificacao dos erros :|
+        }
+
+        if (s.isEmpty()) {
+            return false;
+        }
+
+        String regexPattern = "^\\d{2}:\\d{2}$";
+
+        return Pattern.compile(regexPattern)
+                .matcher(s)
+                .matches();
+    }
+
+    public static boolean isValidTimeRange(String start, String end) {
+        if (isNullOrEmpty(start) || isNullOrEmpty(end)) {
+            return false;
+        }
+
+        int startInt = Integer.parseInt(start.replace(":", ""));
+        int endInt = Integer.parseInt(end.replace(":", ""));
+
+        if (startInt - endInt > 0) {
+            return false;
+        }
+
+        if (startInt > 2399 || endInt > 2399) {
+            return false;
+        }
+
+
+        return true;
+    }
+
+
 }

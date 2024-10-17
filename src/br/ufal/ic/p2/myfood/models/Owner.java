@@ -1,6 +1,6 @@
 package br.ufal.ic.p2.myfood.models;
 
-import br.ufal.ic.p2.myfood.utils.Validators;
+import br.ufal.ic.p2.myfood.validators.CommonValidators;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("owner")
@@ -19,11 +19,11 @@ public class Owner extends User {
     public static Owner create(String name, String email, String password, String address, String cpf) {
         User.create(name, email, password);
 
-        if (Validators.isNullOrEmpty(cpf)) {
+        if (CommonValidators.isNullOrEmpty(cpf)) {
             throw new RuntimeException("CPF invalido");
         }
 
-        if (Validators.isNullOrEmpty(address)) {
+        if (CommonValidators.isNullOrEmpty(address)) {
             throw new RuntimeException("Endereco invalido");
         }
 

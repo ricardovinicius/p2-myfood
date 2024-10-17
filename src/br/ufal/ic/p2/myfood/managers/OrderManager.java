@@ -13,7 +13,7 @@ import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
 import br.ufal.ic.p2.myfood.repositories.OrderRepository;
 import br.ufal.ic.p2.myfood.repositories.ProductRepository;
 import br.ufal.ic.p2.myfood.repositories.UserRepository;
-import br.ufal.ic.p2.myfood.utils.Validators;
+import br.ufal.ic.p2.myfood.validators.CommonValidators;
 import br.ufal.ic.p2.myfood.validators.OrderValidators;
 
 import java.io.IOException;
@@ -101,7 +101,7 @@ public class OrderManager extends Manager {
     public String getOrders(int orderId, String attributeName) {
         Order order = orderRepository.getById(orderId).get();
 
-        if (Validators.isNullOrEmpty(attributeName)) {
+        if (CommonValidators.isNullOrEmpty(attributeName)) {
             throw new InvalidAttributeException("Atributo invalido");
         }
 
@@ -126,7 +126,7 @@ public class OrderManager extends Manager {
     }
 
     public void removeProductFromOrder(int orderId, String productName) {
-        if (Validators.isNullOrEmpty(productName)) {
+        if (CommonValidators.isNullOrEmpty(productName)) {
             throw new IllegalArgumentException("Produto invalido");
         }
 

@@ -4,12 +4,15 @@ import br.ufal.ic.p2.myfood.exceptions.UniqueFieldException;
 import br.ufal.ic.p2.myfood.exceptions.user.AlreadyRegistredEmailException;
 import br.ufal.ic.p2.myfood.exceptions.user.InvalidLoginException;
 import br.ufal.ic.p2.myfood.exceptions.user.NotRegistredUserException;
-import br.ufal.ic.p2.myfood.models.Customer;
-import br.ufal.ic.p2.myfood.models.Owner;
-import br.ufal.ic.p2.myfood.models.User;
+import br.ufal.ic.p2.myfood.models.*;
+import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
+import br.ufal.ic.p2.myfood.repositories.Repository;
 import br.ufal.ic.p2.myfood.repositories.UserRepository;
+import br.ufal.ic.p2.myfood.types.Persistent;
+import br.ufal.ic.p2.myfood.validators.CompanyValidators;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public class UserManager extends Manager {
@@ -33,23 +36,23 @@ public class UserManager extends Manager {
         return user.getAttribute(attribute_name);
     }
 
-    public void createCustomer(String name, String email, String password, String address) {
-        Customer customer = Customer.create(name, email, password, address);
+    public void createUser(String userType, String name, String email, String password, String address, String cpf, String veiculo, String placa) {
+        User user;
 
-        try {
-            userRepository.add(customer);
-        } catch (UniqueFieldException e) {
-            throw new AlreadyRegistredEmailException("Conta com esse email ja existe");
+        if (userType.equals("owner")) {
+            user = Owner.create(name, email, password, address, cpf);
+        } else if (userType.equals("delivery")) {
+            user = Delivery.create(name, email, password, address, veiculo, placa);
+        } else {
+            user = Customer.create(name, email, password, address);
         }
-    }
-
-    public void createOwner(String name, String email, String password, String address, String cpf) {
-        Owner owner = Owner.create(name, email, password, address, cpf);
 
         try {
-            userRepository.add(owner);
+            userRepository.add(user);
         } catch (UniqueFieldException e) {
-            throw new AlreadyRegistredEmailException("Conta com esse email ja existe");
+            if (e.getField().getName().equals("email")) {
+                throw new AlreadyRegistredEmailException("Conta com esse email ja existe");
+            }
         }
     }
 
@@ -72,4 +75,19 @@ public class UserManager extends Manager {
     }
 
 
+    public String listDeliveryCompanies(int deliveryId) {
+        Optional<User> userOptional = userRepository.getById(deliveryId);
+        if (userOptional.isEmpty()) {
+            throw new NotRegistredUserException("Usuario nao cadastrado.");
+        }
+        User user = userOptional.get();
+
+        CompanyValidators.userCanDelivery(user);
+
+        CompanyRepository companyRepository = CompanyRepository.getInstance();
+        List<Company> companyList = companyRepository.list().stream()
+                .filter(company -> company.getDeliveryList().contains(user)).toList();
+
+        return "{" + companyList + "}";
+    }
 }

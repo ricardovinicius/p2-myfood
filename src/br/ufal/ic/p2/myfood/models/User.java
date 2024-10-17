@@ -3,7 +3,7 @@ package br.ufal.ic.p2.myfood.models;
 import br.ufal.ic.p2.myfood.exceptions.user.InvalidUserNameException;
 import br.ufal.ic.p2.myfood.types.Persistent;
 import br.ufal.ic.p2.myfood.types.Unique;
-import br.ufal.ic.p2.myfood.utils.Validators;
+import br.ufal.ic.p2.myfood.validators.CommonValidators;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Customer.class, name = "customer"),
-        @JsonSubTypes.Type(value = Owner.class, name = "owner")
+        @JsonSubTypes.Type(value = Owner.class, name = "owner"),
+        @JsonSubTypes.Type(value = Delivery.class, name = "delivery")
 })
 public abstract class User extends Persistent {
     private static int id_counter = 1;
@@ -35,7 +36,7 @@ public abstract class User extends Persistent {
     }
 
     static void create(String name, String email, String password) {
-        if (Validators.isNullOrEmpty(name)) {
+        if (CommonValidators.isNullOrEmpty(name)) {
             throw new InvalidUserNameException("Nome invalido");
         }
 
@@ -43,11 +44,11 @@ public abstract class User extends Persistent {
             throw new RuntimeException("Email invalido");
         }
 
-        if (!Validators.isValidEmail(email)) {
+        if (!CommonValidators.isValidEmail(email)) {
             throw new RuntimeException("Email invalido");
         }
 
-        if (Validators.isNullOrEmpty(password)) {
+        if (CommonValidators.isNullOrEmpty(password)) {
             throw new RuntimeException("Senha invalido");
         }
     }

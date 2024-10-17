@@ -1,17 +1,8 @@
 package br.ufal.ic.p2.myfood;
 
 import br.ufal.ic.p2.myfood.managers.*;
-import br.ufal.ic.p2.myfood.models.*;
-import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
-import br.ufal.ic.p2.myfood.repositories.OrderRepository;
-import br.ufal.ic.p2.myfood.repositories.ProductRepository;
-import br.ufal.ic.p2.myfood.repositories.UserRepository;
-import br.ufal.ic.p2.myfood.utils.Validators;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 public class Facade {
     MainManager mainManager = new MainManager();
@@ -32,7 +23,7 @@ public class Facade {
                              String email,
                              String senha,
                              String endereco) {
-        userManager.createCustomer(nome, email, senha, endereco);
+        userManager.createUser("customer", nome, email, senha, endereco, null, null, null);
     }
 
     public void criarUsuario(String nome,
@@ -40,7 +31,16 @@ public class Facade {
                              String senha,
                              String endereco,
                              String cpf) {
-        userManager.createOwner(nome, email, senha, endereco, cpf);
+        userManager.createUser("owner", nome, email, senha, endereco, cpf, null, null);
+    }
+
+    public void criarUsuario(String nome,
+                             String email,
+                             String senha,
+                             String endereco,
+                             String veiculo,
+                             String placa) {
+        userManager.createUser("delivery", nome, email, senha, endereco, null, veiculo, placa);
     }
 
     public int login(String email, String senha) {
@@ -48,7 +48,19 @@ public class Facade {
     }
 
     public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String tipoCozinha) {
-        return companyManager.createCompany(tipoEmpresa, dono, nome, endereco, tipoCozinha);
+        return companyManager.createCompany(tipoEmpresa, dono, nome, endereco, tipoCozinha, null, null, false, 0);
+    }
+
+    public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, boolean aberto24horas, int numeroFuncionarios) {
+        return companyManager.createCompany(tipoEmpresa, dono, nome, endereco, null, null, null,  aberto24horas, numeroFuncionarios);
+    }
+
+    public int criarEmpresa(String tipoEmpresa, int dono, String nome, String endereco, String abre, String fecha, String tipoMercado) {
+        return companyManager.createCompany(tipoEmpresa, dono, nome, endereco, tipoMercado, abre, fecha, false, 0);
+    }
+
+    public String getEmpresas(int entregador) {
+        return userManager.listDeliveryCompanies(entregador);
     }
 
     public String getEmpresasDoUsuario(int idDono) {
@@ -61,6 +73,18 @@ public class Facade {
 
     public String getAtributoEmpresa(int empresa, String atributo) {
         return companyManager.getCompanyAttribute(empresa, atributo);
+    }
+
+    public String getEntregadores(int empresa) {
+        return companyManager.getDelivery(empresa);
+    }
+
+    public void alterarFuncionamento(int mercado, String abre, String fecha) {
+        companyManager.updateMarketTime(mercado, abre, fecha);
+    }
+
+    public void cadastrarEntregador(int empresa, int entregador) {
+        companyManager.registerDelivery(empresa, entregador);
     }
 
     public int criarProduto(int empresa, String nome, float valor, String categoria) {
