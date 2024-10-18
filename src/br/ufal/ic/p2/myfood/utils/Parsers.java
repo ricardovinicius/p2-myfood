@@ -4,7 +4,20 @@ import br.ufal.ic.p2.myfood.models.User;
 
 import java.util.List;
 
+import java.util.List;
+
+/**
+ * Utility class for parsing and formatting data related to users.
+ */
 public class Parsers {
+
+    /**
+     * Parses a list of users and returns a formatted string of their email addresses.
+     *
+     * @param list the list of {@link User} objects to be parsed.
+     * @return a formatted string containing the email addresses of the users
+     *         in the format "{[email1, email2, ...]}".
+     */
     public static String deliveryListParser(List<User> list) {
         StringBuilder s = new StringBuilder("{[");
 
@@ -22,3 +35,4 @@ public class Parsers {
     }
 
 }
+

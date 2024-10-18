@@ -47,6 +47,14 @@ public class CommonValidators {
                 .matches();
     }
 
+    /**
+     * Parses the given string as an integer index.
+     *
+     * @param stringIndex the string to be parsed as an integer.
+     * @return the parsed integer index.
+     * @throws InvalidIndexException if the string cannot be parsed to an integer
+     *                               or if the index is negative.
+     */
     public static int parseIndex(String stringIndex) {
         int index;
 
@@ -63,9 +71,16 @@ public class CommonValidators {
         return index;
     }
 
+    /**
+     * Validates the format of the given time string.
+     *
+     * @param s the time string to be validated.
+     * @return {@code true} if the string is null (according to specification),
+     *         {@code false} if it is empty or does not match the time format (HH:mm).
+     */
     public static boolean isValidTimeFormat(String s) {
         if (s == null) {
-            return true; // Isso nao faz sentido, mas eu preciso fazer isso por conta da especificacao dos erros :|
+            return true; // Isso não faz sentido, mas eu preciso fazer isso por conta da especificação dos erros :|
         }
 
         if (s.isEmpty()) {
@@ -79,6 +94,13 @@ public class CommonValidators {
                 .matches();
     }
 
+    /**
+     * Validates the time range defined by the start and end time strings.
+     *
+     * @param start the start time string in HH:mm format.
+     * @param end   the end time string in HH:mm format.
+     * @return {@code true} if the time range is valid, {@code false} otherwise.
+     */
     public static boolean isValidTimeRange(String start, String end) {
         if (isNullOrEmpty(start) || isNullOrEmpty(end)) {
             return false;
@@ -95,9 +117,6 @@ public class CommonValidators {
             return false;
         }
 
-
         return true;
     }
-
-
 }
