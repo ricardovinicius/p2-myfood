@@ -74,7 +74,6 @@ public abstract class Repository<T extends Persistent> {
 
              for (T i : listItem) {
                  try {
-                     System.out.println(getFieldMethod.invoke(i) + " " + getFieldMethod.invoke(item));
                      if (getFieldMethod.invoke(i).equals(getFieldMethod.invoke(item))) {
                          throw new UniqueFieldException(field);
                      }
