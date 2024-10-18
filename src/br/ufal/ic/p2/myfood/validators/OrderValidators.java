@@ -26,4 +26,10 @@ public class OrderValidators {
             throw new OpenOrderException("Nao e possivel liberar um produto que nao esta sendo preparado");
         }
     }
+
+    public static void orderCanBeDelivered(Order order) {
+        if (!order.getStatus().equals("pronto")) {
+            throw new OpenOrderException("Pedido nao esta pronto para entrega");
+        }
+    }
 }

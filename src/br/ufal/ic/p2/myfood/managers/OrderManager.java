@@ -14,9 +14,7 @@ import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
 import br.ufal.ic.p2.myfood.repositories.OrderRepository;
 import br.ufal.ic.p2.myfood.repositories.ProductRepository;
 import br.ufal.ic.p2.myfood.repositories.UserRepository;
-import br.ufal.ic.p2.myfood.validators.CommonValidators;
-import br.ufal.ic.p2.myfood.validators.CompanyValidators;
-import br.ufal.ic.p2.myfood.validators.OrderValidators;
+import br.ufal.ic.p2.myfood.validators.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -190,7 +188,9 @@ public class OrderManager extends Manager {
 
         List<Order> orderList = new ArrayList<>();
         for (Company company : userCompanies) {
-            orderList.addAll(orderRepository.listByCompanyId(company.getId()));
+            List<Order> doneOrders = orderRepository.listByCompanyId(
+                    company.getId()).stream().filter(order -> order.getStatus().equals("pronto")).toList();
+            orderList.addAll(doneOrders);
         }
 
         orderList.sort((o1, o2) -> {
@@ -206,6 +206,10 @@ public class OrderManager extends Manager {
             // Caso contrário, dê prioridade para farmácia
             return isDrugstore1 ? -1 : 1;
         });
+
+        if (orderList.isEmpty()) {
+            throw new NotFoundObjectException("Nao existe pedido para entrega");
+        }
 
         return orderList.getFirst().getId();
     }

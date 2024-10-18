@@ -12,11 +12,13 @@ public class MainManager extends Manager {
         CompanyManager companyManager = new CompanyManager();
         ProductManager productManager = new ProductManager();
         OrderManager orderManager = new OrderManager();
+        RouteManager routeManager = new RouteManager();
 
         managerInstances.add(userManager);
         managerInstances.add(companyManager);
         managerInstances.add(productManager);
         managerInstances.add(orderManager);
+        managerInstances.add(routeManager);
     }
 
     public void cleanRepository() {

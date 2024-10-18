@@ -1,7 +1,11 @@
 package br.ufal.ic.p2.myfood.validators;
 
-import br.ufal.ic.p2.myfood.models.Delivery;
-import br.ufal.ic.p2.myfood.models.User;
+import br.ufal.ic.p2.myfood.exceptions.user.DeliveryUserOnRouteException;
+import br.ufal.ic.p2.myfood.exceptions.user.NullCompanyUser;
+import br.ufal.ic.p2.myfood.models.*;
+import br.ufal.ic.p2.myfood.repositories.CompanyRepository;
+import br.ufal.ic.p2.myfood.repositories.OrderRepository;
+import br.ufal.ic.p2.myfood.repositories.RouteRepository;
 import br.ufal.ic.p2.myfood.repositories.UserRepository;
 
 import java.util.ArrayList;

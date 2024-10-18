@@ -10,6 +10,7 @@ public class Facade {
     CompanyManager companyManager = new CompanyManager();
     ProductManager productManager = new ProductManager();
     OrderManager orderManager = new OrderManager();
+    RouteManager routeManager = new RouteManager();
 
     public void zerarSistema() throws IOException {
         mainManager.cleanRepository();
@@ -133,6 +134,22 @@ public class Facade {
 
     public int getNumeroPedido(int cliente, int empresa, int indice) {
         return orderManager.getOrderId(cliente, empresa, indice);
+    }
+
+    public int criarEntrega(int pedido, int entregador, String destino) {
+        return routeManager.createRoute(pedido, entregador, destino);
+    }
+
+    public String getEntrega(int id, String atributo) {
+        return routeManager.getRouteAttribute(id, atributo);
+    }
+
+    public int getIdEntrega(int pedido) {
+        return routeManager.getRouteId(pedido);
+    }
+
+    public void entregar(int entrega) {
+        routeManager.setRouteDelivered(entrega);
     }
 
     public void encerrarSistema() throws IOException {
